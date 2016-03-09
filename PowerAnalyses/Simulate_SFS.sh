@@ -12,10 +12,9 @@ if [ $2 ]; then
       cd sim$sim
       ./fsc252 -i $1 -n 1 -s 0 -m
       model=`echo $1 | sed s/\.par//` 
-      #cp $model/*.obs ./
-      #mv *.obs ../SimulatedSFS/${sim}_MAFpop0.obs
-     mv $model/*.obs ../SimulatedSFS/${sim}_MAFpop0.obs 
-     cd ..
+      rm $model/*Sites.obs
+      mv $model/*.obs ../SimulatedSFS/${sim}_MAFpop0.obs 
+      cd ..
     done;
 
 else 
