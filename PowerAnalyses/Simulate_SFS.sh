@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #Run this script with  ./Simulate_SFS.sh par_file_name [# of sim datasets to generate]
-#needs a par file that is indicated as the first argument on the command line.
+#needs a par file that is indicated as the first argument on the command line and the fsc252 executable.
 
 if [ $2 ]; then
     mkdir SimulatedSFS
