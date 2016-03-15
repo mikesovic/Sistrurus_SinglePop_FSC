@@ -8,7 +8,7 @@
 #check to make sure we're not going to overwrite anything we want
 
 if [ -d PowerAnalysisResults/$2 ]; then
-   echo "Directory PowerAnalysisResults/$2 already exists. Either delete it prior to running, or choose another name."
+   echo "Directory PowerAnalysisResults/$2 already exists. Either delete it prior to running, or choose another name as the second command line argument."
    exit;
 fi
 
@@ -23,31 +23,6 @@ cd Models/
 estnames=(*\.tpl)
 cd ../
 
-#for each simulated dataset
-for i in $(eval echo {1..$1}); do
-   mkdir PowerAnalysisResults/$2/sim$i;
-   echo "made dir sim$i"
-   #for each model
-
-   for j in ${estnames[@]}; do
-     modelname=`echo $j | sed s/\.tpl$//`
-     mkdir PowerAnalysisResults/$2/sim$i/$modelname
-     
-     if [ ! -d PowerAnalysisResults/$2/sim$i/$modelname/Best_lhoods ]; then
-        mkdir PowerAnalysisResults/$2/sim$i/$modelname/Best_lhoods
-     fi
-
-     for run in $(eval echo {1..$3}); do
-	mkdir PowerAnalysisResults/$2/sim$i/$modelname/run$run
-	cp fsc252 PowerAnalysisResults/$2/sim$i/$modelname/run$run
-	cp Models/$modelname.est PowerAnalysisResults/$2/sim$i/$modelname/run$run
-	cp Models/$modelname.tpl PowerAnalysisResults/$2/sim$i/$modelname/run$run
-	cp SimulatedSFS/*_${i}_*.obs PowerAnalysisResults/$2/sim$i/$modelname/run$run/${modelname}_MAFpop0.obs
-     done 
-   done
-done
-
-
 
 #create shell script and send qsub command for each run (can't send more than 1000 each time)
 time=$4
@@ -55,16 +30,25 @@ time=$4
 #get directory the script is in
 scriptdir=$PWD
 
+#for each simulated dataset
 for i in $(eval echo {1..$1}); do
+  mkdir PowerAnalysisResults/$2/sim$i/
+
+  #for each model name
   for j in ${estnames[@]}; do
      modelname=`echo $j | sed s/\.tpl$// | sed s/Models//`
+     mkdir PowerAnalysisResults/$2/sim$i/$modelname
 
+     if [ ! -d PowerAnalysisResults/$2/sim$i/$modelname/Best_lhoods ]; then
+        mkdir PowerAnalysisResults/$2/sim$i/$modelname/Best_lhoods
+     fi
+
+     #for each fsc run for the current model
      for run in $(eval echo {1..$3}); do
-
+	mkdir PowerAnalysisResults/$2/sim$i/$modelname/run$run
 	jobName=sim${i}_model${modelname}_run${run}.sh
-        echo "created job sim${i}_model${modelname}_run${run}.sh"
-	#Create bash file
 
+	#Create bash file
 	(
 	echo "#!/bin/bash"
 	echo "# specify resources needed"
@@ -75,7 +59,10 @@ for i in $(eval echo {1..$1}); do
 	echo ""
 	echo "set -x"
 	echo ""
-	echo "cp $scriptdir/PowerAnalysisResults/$2/sim$i/$modelname/run$run/* \$TMPDIR"
+        echo "cp $scriptdir/fsc252 \$TMPDIR"
+        echo "cp $scriptdir/Models/$modelname.est \$TMPDIR"
+        echo "cp $scriptdir/Models/$modelname.tpl \$TMPDIR"
+        echo "cp $scriptdir/SimulatedSFS/*_${i}_*.obs \TMPDIR"
 	echo "cd \$TMPDIR"
 	echo ""
 	echo "echo Analysis for simulated dataset $i model $modelname run $run."
@@ -99,7 +86,8 @@ for i in $(eval echo {1..$1}); do
 	echo "Bash file $jobName created."
 
 	qsub ./$jobName
-	cd $scriptdir/PowerAnalysisResults/$2/sim$i/$modelname/run$run/
+	#cd $scriptdir/PowerAnalysisResults/$2/sim$i/$modelname/run$run/
+	cd $scriptdir/
      done
   done
 done
