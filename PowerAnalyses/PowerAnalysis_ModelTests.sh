@@ -26,7 +26,7 @@ cd ../
 #for each simulated dataset
 for i in $(eval echo {1..$1}); do
    mkdir PowerAnalysisResults/$2/sim$i;
-
+   echo "made dir sim$i"
    #for each model
 
    for j in ${estnames[@]}; do
@@ -62,7 +62,7 @@ for i in $(eval echo {1..$1}); do
      for run in $(eval echo {1..$3}); do
 
 	jobName=sim${i}_model${modelname}_run${run}.sh
-
+        echo "created job sim${i}_model${modelname}_run${run}.sh"
 	#Create bash file
 
 	(
